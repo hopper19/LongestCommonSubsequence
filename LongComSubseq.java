@@ -104,26 +104,30 @@ public class LongComSubseq {
       nlcs = new int[M + 1][N + 1];
 
       // Fill row zero and column zero with zeroes
-      for (int i = 0; i != M+1; i++) {
-         nlcs[i][0] = 1;
+      for (int i = 0; i != M + 1; i++) {
+         nlcs[i][0] = 0;
       }
-      for (int j = 0; j != N+1; j++) {
-         nlcs[0][j] = 1;
+      for (int j = 0; j != N + 1; j++) {
+         nlcs[0][j] = 0;
       }
-
-      int m, n;
-      m = 1;
-      while (m <= M) {
-         n = 1;
-         while (n <= N) {
-            if (X.charAt(m - 1) == Y.charAt(n - 1)) {
-               nlcs[m][n] = nlcs[m - 1][n - 1] + nlcs[m - 1][n] + nlcs[m][n - 1];
-            } else {
-               nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1];
-            }
-            n++;
+      
+      int m = 1, n = 1;
+      /*
+       * loop invariant:
+       * bound function: (M+1)*(N+2) - (m*(N+2) + n).
+       */
+      while (m != M + 1) {
+         if (n == N + 1) {
+            m = m + 1;
+            n = 0; // row m is now complete; go to next row
+         } else if (X.charAt(m - 1) == Y.charAt(n - 1)) {
+            // nlcs[m][n] = nlcs[m - 1][n - 1] + nlcs[m - 1][n] + nlcs[m][n - 1];
+            nlcs[m][n] = nlcs[m - 1][n - 1] + nlcs[m - 1][n] + nlcs[m][n - 1] - 1;
+         } else {
+            // nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1];
+            nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1] - nlcs[m - 1][n - 1];
          }
-         m++;
+         n = n + 1;
       }
    }
 
