@@ -105,27 +105,41 @@ public class LongComSubseq {
 
       // Fill row zero and column zero with zeroes
       for (int i = 0; i != M + 1; i++) {
-         nlcs[i][0] = 0;
+         nlcs[i][0] = 1;
       }
       for (int j = 0; j != N + 1; j++) {
-         nlcs[0][j] = 0;
+         nlcs[0][j] = 1;
       }
-      
+
       int m = 1, n = 1;
       /*
-       * loop invariant:
+       * loop invariant: (A i,j | 0<=i<m & 0<=j<=N : nlcs[i][j] = NLCS.i.j) &
+       ** (A j | 0<=j<n : nlcs[m][j] = NLCS.m.j) &
+       ** 1<=m<=M+1 & 0<=n<=N+1
        * bound function: (M+1)*(N+2) - (m*(N+2) + n).
        */
       while (m != M + 1) {
          if (n == N + 1) {
             m = m + 1;
             n = 0; // row m is now complete; go to next row
-         } else if (X.charAt(m - 1) == Y.charAt(n - 1)) {
-            // nlcs[m][n] = nlcs[m - 1][n - 1] + nlcs[m - 1][n] + nlcs[m][n - 1];
-            nlcs[m][n] = nlcs[m - 1][n - 1] + nlcs[m - 1][n] + nlcs[m][n - 1] - 1;
+         }
+         // 5 possibilities for an arbitrary 2x2 grid in the LSC table
+         else if (llcs[m - 1][n - 1] == llcs[m][n]) {
+            nlcs[m][n] = nlcs[m][n - 1] + nlcs[m - 1][n] - nlcs[m - 1][n - 1];
+         } else if (llcs[m - 1][n] != llcs[m][n] && llcs[m][n - 1] != llcs[m][n]) {
+            nlcs[m][n] = nlcs[m - 1][n - 1];
+         } else if (llcs[m - 1][n] == llcs[m][n] && llcs[m][n - 1] == llcs[m][n]) {
+            nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1];
+         } else if (llcs[m][n - 1] == llcs[m][n]) {
+            nlcs[m][n] = nlcs[m][n - 1];
+            if (X.charAt(m - 1) == Y.charAt(n - 1)) {
+               nlcs[m][n] += nlcs[m - 1][n - 1];
+            }
          } else {
-            // nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1];
-            nlcs[m][n] = nlcs[m - 1][n] + nlcs[m][n - 1] - nlcs[m - 1][n - 1];
+            nlcs[m][n] = nlcs[m - 1][n];
+            if (X.charAt(m - 1) == Y.charAt(n - 1)) {
+               nlcs[m][n] += nlcs[m - 1][n - 1];
+            }
          }
          n = n + 1;
       }
@@ -181,6 +195,10 @@ public class LongComSubseq {
       int[][] matching = new int[2][llcs[m][n]];
       int i = m, j = n, k = llcs[m][n] - 1;
 
+      /*
+      * loop invariant:
+      * bound function: i + j.
+      */
       while (i > 0 && j > 0) {
          if (X.charAt(i - 1) == Y.charAt(j - 1)) {
             matching[0][k] = i - 1;
@@ -193,6 +211,7 @@ public class LongComSubseq {
          } else {
             j--;
          }
+         // System.out.printf("%d  %d  %d\n",i,j,k);
       }
 
       return matching;
