@@ -196,9 +196,10 @@ public class LongComSubseq {
       int i = m, j = n, k = llcs[m][n] - 1;
 
       /*
-      * loop invariant:
-      * bound function: i + j.
-      */
+       * loop invariant: (A i | k <= i < llcs[m][n] : x[f.i] = y[g.i]) &
+       *                   0<=i<=m & 0<=i<=n & 0<=k<llcs[m][n]
+       * bound function: i + j.
+       */
       while (i > 0 && j > 0) {
          if (X.charAt(i - 1) == Y.charAt(j - 1)) {
             matching[0][k] = i - 1;
